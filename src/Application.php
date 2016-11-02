@@ -8,6 +8,8 @@
 
 namespace Core;
 
+use Core\Http\Router;
+
 /**
  * Application bootstrap
  */
@@ -16,9 +18,9 @@ class Application
     /**
      * Configuration object
      *
-     * @var Config
+     * @var Config\ConfigInterface
      */
-    private $__config = null;
+    protected $_config = null;
     
     /**
      * Container object
@@ -28,13 +30,20 @@ class Application
     protected $_container = null;
     
     /**
+     * Router object
+     *
+     * @var Router
+     */
+    protected $_router = null;
+    
+    /**
      * Constructor
      * 
-     * @param Config $config Configuration object
+     * @param Config\ConfigInterface $config Configuration object
      */
-    public function __construct(Config $config)
+    public function __construct(Config\ConfigInterface $config)
     {
-        $this->__config = $config;
+        $this->_config = $config;
     }
     
     /**
@@ -43,17 +52,9 @@ class Application
      * @return self
      */
     public function run()
-    {
-        $router = new Router($this);
-        
-        // Checks base URL
-        $baseUrl = $this->getConfig()->app()->baseUrl;
-        if (!empty($baseUrl)) {
-            $router->setBaseUrl($baseUrl);
-        }
-        
+    {    
         // Dispatches current route
-        $router->dispatch();
+        $this->getRouter()->dispatch();
         
         return $this;
     }
@@ -61,11 +62,11 @@ class Application
     /**
      * Gets the configuration object
      *
-     * @return Config
+     * @return Config\ConfigInterface
      */
     public function getConfig()
     {
-        return $this->__config;
+        return $this->_config;
     }
     
     /**
@@ -79,5 +80,26 @@ class Application
             $this->_container = new Service\Container($this->getConfig());
         }
         return $this->_container;
+    }
+    
+    /**
+     * Returns Router object
+     *
+     * @return Router
+     */
+    public function getRouter()
+    {
+        if ($this->_router === null) {
+            // Iniatilizing router
+            $this->_router = new Router($this);
+            
+            // Checks base URL
+            $baseUrl = $this->getConfig()->app()->baseUrl;
+            if (!empty($baseUrl)) {
+                $this->_router->setBaseUrl($baseUrl);
+            }
+        }
+        
+        return $this->_router;
     }
 }
