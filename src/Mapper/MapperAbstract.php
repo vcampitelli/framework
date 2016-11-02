@@ -66,35 +66,34 @@ abstract class MapperAbstract
             $arr[$column] = $model->$method();
         }
         
-        $db = $this->getDb();
-        
-        // Builds INSERT
-        $sql = \sprintf(
-            'INSERT INTO %s (%s) VALUES (%s)',
-            $db->quoteIdentifier($this->_tableName),
-            \implode(', ', \array_keys($arr)),
-            \rtrim(\str_repeat('?, ', \count($arr)), ', ')
-        );
+        // Default fields
+        $hasId = $model->getId();
+        if ((!$hasId) && ((isset($arr['data_inclusao'])) || (\array_key_exists('data_inclusao', $arr)))) {
+            $arr['data_inclusao'] = new \Core\Db\Sql\Expression('NOW()');
+        }
+        if ((isset($arr['data_alteracao'])) || (\array_key_exists('data_alteracao', $arr))) {
+            $arr['data_alteracao'] = new \Core\Db\Sql\Expression('NOW()');
+        }
         
         // If $model has an ID, appends ON DUPLICATE KEY to the SQL statement
-        if ($model->getId()) {
-            $sql .= ' ON DUPLICATE KEY UPDATE ';
+        $arrOnUpdate = [];
+        if ($hasId) {
             $primaryKey = $model->getPrimaryKey();
             foreach ($arr as $column => $value) {
-                if ($column !== $primaryKey) {
-                    $column = $db->quoteIdentifier($column);
-                    $sql .= "{$column} = VALUES({$column}), ";
+                if (($column !== $primaryKey) && ($column !== 'data_inclusao')) {
+                    $arrOnUpdate[] = $column;
                 }
             }
-            $sql = \rtrim($sql, ', ');
         }
         
-        $stmt = $db->prepare($sql);
-        if (!$stmt->execute(array_values($arr))) {
-            throw new \RuntimeException(\sprintf('[%s] %s', $this->_tableName, \implode(' - ', $stmt->errorInfo())));
-        }
+        // Executes statement
+        $id = $this->getDb()->execute(
+            new \Core\Db\Sql\Statement\Insert($this->_tableName, $arr, $arrOnUpdate)
+        );
         
-        $model->setId($db->lastInsertId());
+        // Updates model ID
+        $model->setId($id);
+        
         return $model;
     }
     
@@ -124,6 +123,62 @@ abstract class MapperAbstract
     }
     
     /**
+     * Fetchs all data from table
+     *
+     * @return array
+     */
+    public function fetchAll()
+    {
+        // Query
+        $db = $this->getDb();
+        $sql = \sprintf('SELECT * FROM %s', $db->quoteIdentifier($this->_tableName));
+        $query = $db->query($sql);
+        
+        // Iterates over data
+        $arr = [];
+        $class = static::MODEL;
+        while ($row = $query->fetch(\PDO::FETCH_ASSOC)) {
+            // Indexes by primary key
+            $model = new $class($row);
+            $arr[$model->getId()] = $model;
+        }
+        return $arr;
+    }
+    
+    /**
+     * Finds a row optionally filtered by $where caluses
+     *
+     * @param  array $where WHERE clauses
+     *
+     * @return ModelAbstract
+     */
+    public function fetchRow(array $where = null)
+    {
+        // Query
+        $db = $this->getDb();
+        $sql = \sprintf('SELECT * FROM %s', $db->quoteIdentifier($this->_tableName));
+        
+        // WHERE
+        if (!empty($where)) {
+            $arr = [];
+            foreach ($where as $key => $value) {
+                $arr[] = $db->quoteIdentifier($key) . ' = ' . $db->quote($value);
+            }
+            $sql .= ' WHERE ' . \implode(' AND ', $arr);
+        }
+        $sql .= ' LIMIT 1';
+        
+        // Executes statement
+        $query = $db->query($sql);
+        if ($row = $query->fetch(\PDO::FETCH_ASSOC)) {
+            $class = static::MODEL;
+            return new $class($row);
+        }
+        
+        return null;
+    }
+    
+    /**
      * Returns a model translation from object properties to database columns
      *
      * @param  ModelAbstract $model Model to translate
@@ -149,5 +204,15 @@ abstract class MapperAbstract
         }
         
         return self::$__arrMapping[$class];
+    }
+    
+    /**
+     * Returns current Adapter object
+     *
+     * @return Adapter
+     */
+    public function getDb()
+    {
+        return $this->__db;
     }
 }

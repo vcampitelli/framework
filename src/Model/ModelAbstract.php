@@ -16,6 +16,41 @@ namespace Core\Model;
 abstract class ModelAbstract
 {
     /**
+     * Constructor
+     *
+     * @param array $data Data to be loaded into model (optional)
+     */
+    public function __construct(array $data = null)
+    {
+        if (!empty($data)) {
+            $this->load($data);
+        }
+    }
+    
+    /**
+     * Loads data into model
+     *
+     * @param  array  $data Data to be loaded
+     *
+     * @return self
+     */
+    public function load(array $data)
+    {
+        foreach ($data as $key => $value) {
+            /*
+            if ($key == static::PRIMARY) {
+                $method = 'setId';
+            } else {
+                $method = \Core\Filter::camelCase("set_{$key}");
+            }
+            */
+            $method = \Core\Filter::camelCase("set_{$key}");
+            $this->{$method}($value);
+        }
+        return $this;
+    }
+    
+    /**
      * Magic call for getters and setters
      *
      * @throws \BadMethodCallException If it's an invalid property
@@ -34,15 +69,15 @@ abstract class ModelAbstract
             $property = \substr($method, 3);
             $property[0] = \strtolower($property[0]);
             if ($property === 'id') {
-                if (empty($this->_primary)) {
+                if (\defined('static::PRIMARY')) {
+                    $property = \Core\Filter::camelCase(static::PRIMARY);
+                } else {
                     if ($isGet) {
                         return null;
                     } else {
                         // let the rest of the code throw an exception
                         $property = null;
                     }
-                } else {
-                    $property = \Core\Filter::camelCase($this->_primary);
                 }
             }
             if ($property) {
@@ -70,6 +105,6 @@ abstract class ModelAbstract
      */
     public function getPrimaryKey()
     {
-        return $this->_primary;
+        return static::PRIMARY;
     }
 }
