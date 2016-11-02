@@ -6,12 +6,12 @@
  * @since       2016-10-30
  */
 
-namespace Core;
+namespace Core\Config;
 
 /**
  * Handles the configuration
  */
-class Config extends Config\Object
+class Config extends Object
 {
     /**
      * Reads a INI file

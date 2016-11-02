@@ -11,7 +11,7 @@ namespace Core\Config;
 /**
  * Represents a object from the configuration data
  */
-class Object
+class Object implements ConfigInterface
 {
     /**
      * Data
