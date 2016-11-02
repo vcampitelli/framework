@@ -8,7 +8,7 @@
 
 namespace Core\Service;
 
-use Core\Config;
+use Core\Config\ConfigInterface;
 
 /**
  * Abstract factory
@@ -27,16 +27,16 @@ abstract class FactoryAbstract
     /**
      * Configuration object
      *
-     * @var Config
+     * @var ConfigInterface
      */
     private $__config = null;
 
     /**
      * Constructor
      * 
-     * @param Config $config Configuration object
+     * @param ConfigInterface $config Configuration object
      */
-    public function __construct(Config $config)
+    public function __construct(ConfigInterface $config)
     {
         $this->__config = $config;
     }
@@ -59,7 +59,7 @@ abstract class FactoryAbstract
     /**
      * Gets the configuration object
      *
-     * @return Config
+     * @return ConfigInterface
      */
     public function getConfig()
     {

@@ -8,17 +8,17 @@
 
 namespace Core\Service;
 
-use Core\Config;
+use Core\Config\ConfigInterface;
 
 /**
  * Application service manager
  */
-class Container
+class Container implements ContainerInterface
 {
     /**
      * Configuration object
      *
-     * @var Config
+     * @var ConfigInterface
      */
     private $__config = null;
     
@@ -32,9 +32,9 @@ class Container
     /**
      * Constructor
      * 
-     * @param Config $config Configuration object
+     * @param ConfigInterface $config Configuration object
      */
-    public function __construct(Config $config)
+    public function __construct(ConfigInterface $config)
     {
         $this->__config = $config;
     }
@@ -59,8 +59,9 @@ class Container
             
             if (\is_subclass_of($class, \Core\Mapper\MapperAbstract::class)) {
                 $factory = new \Core\Db\Factory($this->getConfig());
+                $db = $factory->build($class::CONNECTION);
 
-                $this->_pool[$class] = $factory->build($class::CONNECTION);
+                $this->_pool[$class] = new $class($db);
             } else {
                 $this->_pool[$class] = new $class();
             }
@@ -71,7 +72,7 @@ class Container
     /**
      * Gets the configuration object
      *
-     * @return Config
+     * @return ConfigInterface
      */
     public function getConfig()
     {
