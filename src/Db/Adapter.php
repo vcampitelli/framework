@@ -139,6 +139,7 @@ class Adapter
             (empty($data['password'])) ? '' : $data['password'],
             $arrConfig
         );
+        $this->__pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         $this->__log(__METHOD__, "conectado ao banco {$data['database']}", self::LOG_SUCCESS);        
         
         // Debug level
@@ -251,6 +252,18 @@ class Adapter
             return 'NULL';
         }
         return $this->__pdo->quote($value);
+    }
+    
+    /**
+     * Executes statement
+     *
+     * @param  Sql\Statement\StatementInterface $statement Statement object
+     *
+     * @return mixed
+     */
+    public function execute(Sql\Statement\StatementInterface $statement)
+    {
+        return $statement->execute($this);
     }
     
     /**
