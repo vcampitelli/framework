@@ -9,23 +9,7 @@ define('APPLICATION_PATH', realpath(__DIR__ . '/../'));
  */
 define('APPLICATION_ENV', (getenv('APPLICATION_ENV') ?: 'production'));
 
-/**
- * Dummy autoloader
- *
- * @author Vinícius Campitelli <eu@viniciuscampitelli.com>
- * @since  2016-10-30
- */
-spl_autoload_register(function ($class) {
-    $arrClass = \explode('\\', \str_replace('..', '', $class));
-    
-    // Main namespace
-    $module = \strtolower(\array_shift($arrClass));
-    
-    $path = APPLICATION_PATH . "/{$module}/class/" . implode('/', $arrClass) . '.php';
-    if (\is_file($path)) {
-        include $path;
-    }
-});
+require __DIR__ . '/../../autoload.php';
 
 try {
     // Reads app.ini file
