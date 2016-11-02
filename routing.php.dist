@@ -1,0 +1,9 @@
+<?php
+
+return [
+    'route.id' => [
+        'url'        => '/route/to/resource',
+        'controller' => Path\To\Controller::class,
+        'action'     => 'actionName'
+    ]
+];
