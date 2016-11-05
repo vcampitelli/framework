@@ -97,7 +97,7 @@ class Router
                 throw new \Exception('Action not found.');
             }
             
-            if (!\is_subclass_of($route['controller'], \Core\Controller\ControllerInterface::class)) {
+            if (!\is_subclass_of($route['controller'], '\Core\Controller\ControllerInterface')) {
                 throw new \Exception('Invalid controller.');
             }
         } catch (\Exception $e) {

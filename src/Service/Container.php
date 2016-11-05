@@ -57,7 +57,7 @@ class Container implements ContainerInterface
                 throw new \InvalidArgumentException("Não foi possível encontrar a classe {$class}");
             }
             
-            if (\is_subclass_of($class, \Core\Mapper\MapperAbstract::class)) {
+            if (\is_subclass_of($class, '\Core\Mapper\MapperAbstract')) {
                 $factory = new \Core\Db\Factory($this->getConfig());
                 $db = $factory->build($class::CONNECTION);
 

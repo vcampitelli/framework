@@ -179,6 +179,21 @@ abstract class MapperAbstract
     }
     
     /**
+     * Finds a record by its id
+     *
+     * @param  mixed $id ID
+     *
+     * @return ModelAbstract
+     */
+    public function find($id)
+    {
+        $model = static::MODEL;
+        return $this->fetchRow([
+            $model::PRIMARY => $id
+        ]);
+    }
+
+    /**
      * Returns a model translation from object properties to database columns
      *
      * @param  ModelAbstract $model Model to translate

@@ -25,7 +25,7 @@ class Response
      *
      * @var boolean
      */
-    protected $_asJson = false;
+    protected $_isJson = false;
     
     /**
      * Constructor
