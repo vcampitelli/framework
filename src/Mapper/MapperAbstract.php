@@ -125,14 +125,36 @@ abstract class MapperAbstract
     /**
      * Fetchs all data from table
      *
+     * @param  array $where WHERE clauses (optional)
+     * 
      * @return array
      */
-    public function fetchAll()
+    public function fetchAll(array $where = null)
     {
         // Query
         $db = $this->getDb();
         $sql = \sprintf('SELECT * FROM %s', $db->quoteIdentifier($this->_tableName));
-        $query = $db->query($sql);
+        
+        if (!empty($where)) {
+            $arrWhere = $arrBind = [];
+            foreach ($where as $key => $value) {
+                if (\is_numeric($key)) {
+                    $arrWhere[] = $value;
+                } elseif (\is_array($value)) {
+                    $arrWhere[] = \str_replace('?', \rtrim(\str_repeat('?,', \count($value)), ','), $key);
+                    $arrBind = \array_merge($arrBind, $value);
+                } else {
+                    $arrWhere[] = $key;
+                    $arrBind[] = $value;
+                }
+            }
+            $sql .= ' WHERE ' . \implode(' AND ', $arrWhere);
+            
+            $query = $db->prepare($sql);
+            $query->execute($arrBind);
+        } else {
+            $query = $db->query($sql);
+        }
         
         // Iterates over data
         $arr = [];

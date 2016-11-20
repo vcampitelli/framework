@@ -2,17 +2,19 @@
 /**
  * Application path
  */
-define('APPLICATION_PATH', realpath(__DIR__));
+define('APPLICATION_PATH', realpath(dirname(__DIR__)));
 
 /**
  * Application environment
  */
 define('APPLICATION_ENV', (getenv('APPLICATION_ENV') ?: 'production'));
 
+require APPLICATION_PATH . '/vendor/autoload.php';
+
 try {
     // Reads app.ini file
     $config = new \Core\Config\Config();
-    $config->readIni(realpath('../config/app.ini'));
+    $config->readIni(realpath('../config/' . APPLICATION_ENV . '.ini'));
 
     // Bootstrapping application
     $app = new \Core\Application($config);

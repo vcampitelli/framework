@@ -53,8 +53,8 @@ class Application
      */
     public function run()
     {    
-        // Dispatches current route
-        $this->getRouter()->dispatch();
+        // Executes current route and dispatches its response
+        $this->getRouter()->run();
         
         return $this;
     }

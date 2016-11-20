@@ -46,16 +46,13 @@ class Router
         $this->_app = $app;
     }
     
-    /**
-     * Dispatches current route
-     *
-     * @param  Request $request Request object (optional)
-     * 
-     * @return void
-     */
-    public function dispatch(Request $request = null)
+    public function run(Request $request = null)
     {
-        $url = $_SERVER['REQUEST_URI'];
+        // Creates request object
+        if ($request === null) {
+            $request = Request::fromGlobals();
+        }
+        $url = $request->getAttr('REQUEST_URI');
         
         // Base URL
         $baseUrl = $this->getBaseUrl();
@@ -78,43 +75,56 @@ class Router
                 }
             }
         }
-        
-        // Creates request object
-        if ($request === null) {
-            $request = Request::fromGlobals();
-        }
-        $response = Response::fromRequest($request);
-        
-        try {
+    
+        try {    
             if ($route === null) {
-                throw new \Exception('Route not found.');
+                throw new \Exception('Route not found.', 404);
             }
             
-            if (empty($route['controller'])) {
-                throw new \Exception('Controller not found.');
-            }
-            if (empty($route['action'])) {
-                throw new \Exception('Action not found.');
-            }
-            
-            if (!\is_subclass_of($route['controller'], '\Core\Controller\ControllerInterface')) {
-                throw new \Exception('Invalid controller.');
-            }
+            $response = $this->buildResponse($route['controller'], $route['action'], $request);
         } catch (\Exception $e) {
-            return $response->withError($e->getMessage(), 404);
+            $response = Response\ResponseAbstract::fromRequest($request);
+            $response->withError($e->getMessage(), ($e->getCode()) ?: 500);
         }
         
-        try {
-            // Dispatchs request to controller
-            $controller = new $route['controller']($this->getApplication()->getContainer());
-            $return = $controller->{$route['action']}($request, $response);
-            if (!$return instanceof Response) {
-                $return = $response->withSuccess($return);
-            }
-            return $return;
-        } catch (\Exception $e) {
-            return $response->withError($e->getMessage(), 400);
+        if ($response instanceof Response\ViewResponse) {
+            $response->dispatch($route['controller'], $route['action']);
+        } else {
+            $response->dispatch();
         }
+        return $response;
+    }
+    
+    /**
+     * Dispatches current route and returns the related response object
+     *
+     * @param  Request $request Request object (optional)
+     * 
+     * @return ResponseAbstract
+     */
+    protected function buildResponse($controller, $action, Request $request)
+    {
+        // 404 error
+        if (empty($controller)) {
+            throw new \Exception('Controller not found.', 404);
+        }
+        if (empty($action)) {
+            throw new \Exception('Action not found.', 404);
+        }
+        if (!\is_subclass_of($controller, '\Core\Controller\ControllerInterface')) {
+            throw new \Exception('Invalid controller.', 404);
+        }
+        
+        // Dispatchs request to controller
+        $controller = new $controller($this->getApplication()->getContainer());
+        $return = $controller->{$action}($request);
+        if ($return instanceof Response\ResponseAbstract) {
+            return $return;
+        }
+        
+        // Default response
+        $response = Response\ResponseAbstract::fromRequest($request);
+        return $response->withSuccess($return);
     }
     
     /**

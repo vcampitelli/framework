@@ -85,12 +85,25 @@ class Request
     }
     
     /**
-     * Returns server configuration data
+     * Checks if it's an AJAX request (probably)
      *
-     * @return array
+     * @return boolean
      */
-    public function getServer()
+    public function isAjax()
     {
-        return $this->_server;
+        return (!empty($this->_server['HTTP_X_REQUESTED_WITH']))
+            && (\strtolower($this->_server['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+    }
+    
+    /**
+     * Returns the request attribute
+     *
+     * @param  string $attr Attribute name
+     *
+     * @return mixed
+     */
+    public function getAttr($attr)
+    {
+        return (isset($this->_server[$attr])) ? $this->_server[$attr] : null;
     }
 }
