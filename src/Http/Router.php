@@ -76,7 +76,7 @@ class Router
             }
         }
     
-        try {    
+        try {
             if ($route === null) {
                 throw new \Exception('Route not found.', 404);
             }
@@ -99,7 +99,7 @@ class Router
      * Dispatches current route and returns the related response object
      *
      * @param  Request $request Request object (optional)
-     * 
+     *
      * @return ResponseAbstract
      */
     protected function buildResponse($controller, $action, Request $request)
@@ -131,7 +131,7 @@ class Router
      * Loads routing parameters
      *
      * @throws \DomainException If the router can't parse the parameter
-     * 
+     *
      * @param  mixed $param Array or file path
      *
      * @return self

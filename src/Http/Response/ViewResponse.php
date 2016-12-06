@@ -23,6 +23,13 @@ class ViewResponse extends ResponseAbstract
     protected $_data = [];
     
     /**
+     * Response status
+     *
+     * @var boolean
+     */
+    protected $_status = true;
+    
+    /**
      * Returns a success response
      *
      * @param  mixed $data Data to be dispatched
@@ -32,6 +39,7 @@ class ViewResponse extends ResponseAbstract
     protected function doSuccess($data)
     {
         $this->_data = (array) $data;
+        $this->_status = true;
         return $this;
     }
     
@@ -45,7 +53,15 @@ class ViewResponse extends ResponseAbstract
      */
     protected function doError($data, $status)
     {
-        $this->_data = (array) $data;
+        if (\is_array($data)) {
+            $this->_data = $data;
+        } else {
+            $this->_data = [
+                'content' => $data
+            ];
+        }
+        $this->_status = false;
+        
         return $this;
     }
     
@@ -56,8 +72,11 @@ class ViewResponse extends ResponseAbstract
      */
     public function dispatch()
     {
+        // Initializing view
+        $view = new View\HtmlView();
+        
         // Two arguments: controller and action
-        if (\func_num_args() == 2) {
+        if (($this->_status) && (\func_num_args() == 2)) {
             list($controller, $action) = \func_get_args();
             $controller = \strtolower($controller);
             
@@ -69,9 +88,6 @@ class ViewResponse extends ResponseAbstract
             // Separates module from the controller name
             $arr = \explode('\\', \trim($controller, '\\'));
             $module = \array_shift($arr);
-            
-            // Initializing view
-            $view = new View\HtmlView();
             
             // Script path
             $script = APPLICATION_PATH . "/{$module}/view/" . \implode('/', $arr) . "/{$action}.phtml";
@@ -94,6 +110,10 @@ class ViewResponse extends ResponseAbstract
             }
         }
         
+        // View data
+        foreach ($this->_data as $key => $value) {
+            $view->{$key} = $value;
+        }
         $view->render(APPLICATION_PATH . '/view/error.phtml');
         
         return $this;
