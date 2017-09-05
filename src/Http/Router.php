@@ -9,6 +9,8 @@
 namespace Vcampitelli\Framework\Http;
 
 use Vcampitelli\Framework\Application;
+use Vcampitelli\Framework\Controller\ControllerInterface;
+use Exception;
 
 /**
  * URL routing
@@ -49,11 +51,12 @@ class Router
     /**
      * Process the request
      *
-     * @param Request $request Request object
+     * @param  Request $request  Request object
+     * @param  string  $basePath Base path for view rendering
      *
      * @return Response\ResponseAbstract
      */
-    public function run(Request $request)
+    public function run(Request $request, $basePath = null)
     {
         $url = $request->getAttr('REQUEST_URI');
 
@@ -67,17 +70,17 @@ class Router
             // Verifies that route exists
             $route = $this->getRouteByUrl($url);
             if (!$route) {
-                throw new \Exception('Route not found.', 404);
+                throw new Exception('Route not found.', 404);
             }
 
             $response = $this->buildResponse($route['controller'], $route['action'], $request);
         } catch (\Exception $e) {
             $response = Response\ResponseAbstract::fromRequest($request);
-            $response->withError($e->getMessage(), ($e->getCode()) ?: 500);
+            $response->withError($e, ($e->getCode()) ?: 500);
         }
 
         if ($response instanceof Response\ViewResponse) {
-            $response->dispatch($route['controller'], $route['action']);
+            $response->dispatch($route['controller'], $route['action'], $basePath);
             return $response;
         }
 
@@ -126,13 +129,13 @@ class Router
     {
         // 404 error
         if (empty($controller)) {
-            throw new \Exception('Controller not found.', 404);
+            throw new Exception('Controller not found.', 404);
         }
         if (empty($action)) {
-            throw new \Exception('Action not found.', 404);
+            throw new Exception('Action not found.', 404);
         }
-        if (!\is_subclass_of($controller, '\Core\Controller\ControllerInterface')) {
-            throw new \Exception('Invalid controller.', 404);
+        if (!\is_subclass_of($controller, ControllerInterface::class)) {
+            throw new Exception('Invalid controller.', 404);
         }
 
         // Dispatchs request to controller

@@ -83,7 +83,7 @@ abstract class MapperAbstract
 
         // Executes statement
         $id = $this->getDb()->execute(
-            new \Core\Db\Sql\Statement\Insert($this->tableName, $arr, $arrOnUpdate)
+            new \Vcampitelli\Framework\Db\Sql\Statement\Insert(static::TABLENAME, $arr, $arrOnUpdate)
         );
 
         // Updates model ID
@@ -149,7 +149,6 @@ abstract class MapperAbstract
         // Query
         $query = $this->buildQuery($where);
 
-
         // Iterates over data
         $arr = [];
         $class = static::MODEL;
@@ -170,7 +169,7 @@ abstract class MapperAbstract
      */
     protected function buildQuery(array $where = null)
     {
-        $sql = \sprintf('SELECT * FROM %s', $this->getDb()->quoteIdentifier($this->tableName));
+        $sql = \sprintf('SELECT * FROM %s', $this->getDb()->quoteIdentifier(static::TABLENAME));
 
         if (empty($where)) {
             return $this->getDb()->query($sql);
@@ -211,7 +210,7 @@ abstract class MapperAbstract
     {
         // Query
         $db = $this->getDb();
-        $sql = \sprintf('SELECT * FROM %s', $db->quoteIdentifier($this->tableName));
+        $sql = \sprintf('SELECT * FROM %s', $db->quoteIdentifier(static::TABLENAME));
 
         // WHERE
         if (!empty($where)) {
@@ -268,7 +267,7 @@ abstract class MapperAbstract
                     $name = \substr($name, 1);
                     $index = $name;
                     $index[0] = \strtoupper($index);
-                    self::$arrMapping[$class][$index] = \Core\Filter::uncamelCase($name, '_' /* $separator */);
+                    self::$arrMapping[$class][$index] = \Vcampitelli\Framework\Filter::uncamelCase($name, '_' /* $separator */);
                 }
             }
         }

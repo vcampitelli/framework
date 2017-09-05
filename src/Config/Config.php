@@ -23,7 +23,7 @@ class Config extends Object
     public function readIni($file)
     {
         $arr = \parse_ini_file($file, true);
-        $this->_data = $this->parse($arr);
+        $this->data = $this->parse($arr);
         return $this;
     }
 

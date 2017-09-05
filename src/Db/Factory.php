@@ -11,7 +11,7 @@ namespace Vcampitelli\Framework\Db;
 /**
  * Factory for the adapters
  */
-class Factory extends \Core\Service\FactoryAbstract
+class Factory extends \Vcampitelli\Framework\Service\FactoryAbstract
 {
     /**
      * Builds a new database connection, ignoring the pool

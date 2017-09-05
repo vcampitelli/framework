@@ -62,16 +62,20 @@ class ViewResponse extends ResponseAbstract
     /**
      * Dispatches current response
      *
+     * @param  string $controller Controller to handle custom response, if any (optional)
+     * @param  string $action     Action to handle custom response, if any (optional)
+     * @param  string $basePath   Base path por views (optional)
+     *
      * @return self
      */
-    public function dispatch()
+    public function dispatch($controller = null, $action = null, $basePath = null)
     {
         // Initializing view
         $view = new View\HtmlView();
+        $basePath = rtrim(trim($basePath), '/') . '/';
 
         // Two arguments: controller and action
-        if (($this->status) && (\func_num_args() == 2)) {
-            list($controller, $action) = \func_get_args();
+        if (($this->status) && (!empty($controller)) && (!empty($action))) {
             $controller = \strtolower($controller);
 
             // Removes "Controller" from its name
@@ -81,10 +85,9 @@ class ViewResponse extends ResponseAbstract
 
             // Separates module from the controller name
             $arr = \explode('\\', \trim($controller, '\\'));
-            $module = \array_shift($arr);
 
             // Script path @FIXME APPLICATION_PATH
-            $script = APPLICATION_PATH . "/{$module}/view/" . \implode('/', $arr) . "/{$action}.phtml";
+            $script = $basePath . \implode('/', $arr) . "/{$action}.phtml";
             if (\is_file($script)) {
                 // Initializing view
                 $innerView = new View\HtmlView();
@@ -97,7 +100,7 @@ class ViewResponse extends ResponseAbstract
                 // View content
                 $view->content = $innerView->partial($script);
 
-                $view->render(APPLICATION_PATH . '/view/layout.phtml');
+                $view->render("{$basePath}/layout.phtml");
                 return $this;
             }
 
@@ -108,7 +111,7 @@ class ViewResponse extends ResponseAbstract
         foreach ($this->data as $key => $value) {
             $view->{$key} = $value;
         }
-        $view->render(APPLICATION_PATH . '/view/error.phtml');
+        $view->render("{$basePath}/error.phtml");
 
         return $this;
     }

@@ -24,6 +24,13 @@ class Application
     protected $config = null;
 
     /**
+     * View base path
+     *
+     * @var string
+     */
+    protected $viewBasePath = null;
+
+    /**
      * Container object
      *
      * @var Service\Container
@@ -40,24 +47,26 @@ class Application
     /**
      * Constructor
      *
-     * @param Config\ConfigInterface $config Configuration object
+     * @param Config\ConfigInterface    $config         Configuration object
+     * @param string                    $viewBasePath   Application path (optional)
      */
-    public function __construct(Config\ConfigInterface $config)
+    public function __construct(Config\ConfigInterface $config, $viewBasePath = null)
     {
         $this->config = $config;
+        $this->viewBasePath = $viewBasePath;
     }
 
     /**
      * Bootstraps application
      *
-     * @param Request $request Request object
+     * @param  Request $request Request object
      *
      * @return self
      */
     public function run(Request $request)
     {
         // Executes current route and dispatches its response
-        $this->getRouter()->run();
+        $this->getRouter()->run($request, $this->viewBasePath);
 
         return $this;
     }

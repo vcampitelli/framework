@@ -41,10 +41,10 @@ abstract class ModelAbstract
             if ($key == static::PRIMARY) {
                 $method = 'setId';
             } else {
-                $method = \Core\Filter::camelCase("set_{$key}");
+                $method = \Vcampitelli\Framework\Filter::camelCase("set_{$key}");
             }
             */
-            $method = \Core\Filter::camelCase("set_{$key}");
+            $method = \Vcampitelli\Framework\Filter::camelCase("set_{$key}");
             $this->{$method}($value);
         }
         return $this;
@@ -106,7 +106,7 @@ abstract class ModelAbstract
     {
         if ($property === 'id') {
             if (\defined('static::PRIMARY')) {
-                return \Core\Filter::camelCase(static::PRIMARY);
+                return \Vcampitelli\Framework\Filter::camelCase(static::PRIMARY);
             }
             return null;
         }

@@ -1,10 +1,5 @@
 <?php
 /**
- * Application path
- */
-define('APPLICATION_PATH', realpath(dirname(__DIR__)));
-
-/**
  * Application environment
  */
 define('APPLICATION_ENV', (getenv('APPLICATION_ENV') ?: 'production'));
@@ -12,14 +7,14 @@ define('APPLICATION_ENV', (getenv('APPLICATION_ENV') ?: 'production'));
 require APPLICATION_PATH . '/vendor/autoload.php';
 
 try {
-    // Reads app.ini file
-    $config = new \Core\Config\Config();
+    // Reads ini file
+    $config = new Vcampitelli\Framework\Config\Config();
     $config->readIni(realpath('../config/' . APPLICATION_ENV . '.ini'));
 
     // Bootstrapping application
-    $app = new \Core\Application($config);
+    $app = new Vcampitelli\Framework\Application($config, realpath(dirname(__DIR__)) /* $basePath */);
     $app->getRouter()->load(realpath('../config/routes.php'));
-    $app->run(\Core\Http\Request::fromGlobals());
+    $app->run(Vcampitelli\Framework\Http\Request::fromGlobals());
 } catch (Exception $e) {
     if (APPLICATION_ENV == 'development') {
         var_dump($e);

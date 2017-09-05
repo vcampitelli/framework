@@ -107,7 +107,7 @@ class Adapter
     protected function connect(array $data)
     {
         $this->pdo = $this->buildConnection($data);
-        $this->log(__METHOD__, "conectado ao banco {$data['database']}", self::LOG_SUCCESS);
+        $this->log(__METHOD__, "conectado ao banco {$data['dbname']}", self::LOG_SUCCESS);
 
         // Debug level
         if (empty($data['debug'])) {
@@ -129,7 +129,7 @@ class Adapter
      */
     protected function buildConnection(array $data, array $arrConfig = [])
     {
-        if (empty($data['database'])) {
+        if (empty($data['dbname'])) {
             throw new \InvalidArgumentException('Você deve especificar o nome da base de dados.');
         }
 
@@ -148,15 +148,15 @@ class Adapter
         // DSN
         $dsn = \sprintf(
             'mysql:host=%s;port=%d;dbname=%s',
-            (empty($data['server'])) ? 'localhost' : $data['server'],
+            (empty($data['host'])) ? 'localhost' : $data['host'],
             $data['port'],
-            $data['database']
+            $data['dbname']
         );
 
         // Connecting
         $pdo = new \PDO(
             $dsn,
-            (empty($data['username'])) ? '' : $data['username'],
+            (empty($data['user'])) ? '' : $data['user'],
             (empty($data['password'])) ? '' : $data['password'],
             $arrConfig
         );
@@ -304,7 +304,7 @@ class Adapter
     {
         if (($this->debug === $type) || ($this->debug === self::LOG_DEBUG)) {
             file_put_contents(
-                __DIR__ . '/db.log',
+                __DIR__ . '/db.log', // @FIXME
                 '[' . date('d/m/Y H:i:s') . "] [{$type}|{$cat}]\t{$text}\n",
                 FILE_APPEND | LOCK_EX
             );
