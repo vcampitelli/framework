@@ -10,10 +10,11 @@ namespace Core\Mapper;
 
 use Core\Model\ModelAbstract;
 use Core\Db\Adapter;
+use Core\Db\Sql\Expression;
 
 /**
  * Abstract mapper
- * 
+ *
  * @abstract
  */
 abstract class MapperAbstract
@@ -24,22 +25,22 @@ abstract class MapperAbstract
      * @var string
      */
     const CONNECTION = 'default';
-    
+
     /**
      * Database connection
      *
      * @var App_Db_Adapter
      */
-    private $__db = null;
-    
+    private $db = null;
+
     /**
      * Property translations into database columns
      *
      * @static
      * @var array
      */
-    private static $__arrMapping = [];
-    
+    private static $arrMapping = [];
+
     /**
      * Constructor
      *
@@ -47,9 +48,9 @@ abstract class MapperAbstract
      */
     public function __construct(Adapter $db)
     {
-        $this->__db = $db;
+        $this->db = $db;
     }
-    
+
     /**
      * Saves a record
      *
@@ -58,26 +59,20 @@ abstract class MapperAbstract
      * @return boolean|int               Record ID on success or false otherwise
      */
     public function save(ModelAbstract $model)
-    { 
+    {
         // Gets model property -> database column mapping
         $arr = [];
         foreach (self::getModelMapping($model) as $property => $column) {
             $method = "get{$property}";
             $arr[$column] = $model->$method();
         }
-        
+
         // Default fields
-        $hasId = $model->getId();
-        if ((!$hasId) && ((isset($arr['data_inclusao'])) || (\array_key_exists('data_inclusao', $arr)))) {
-            $arr['data_inclusao'] = new \Core\Db\Sql\Expression('NOW()');
-        }
-        if ((isset($arr['data_alteracao'])) || (\array_key_exists('data_alteracao', $arr))) {
-            $arr['data_alteracao'] = new \Core\Db\Sql\Expression('NOW()');
-        }
-        
+        $arr = $this->parseDefaultFields($model, $arr);
+
         // If $model has an ID, appends ON DUPLICATE KEY to the SQL statement
         $arrOnUpdate = [];
-        if ($hasId) {
+        if ($model->getId()) {
             $primaryKey = $model->getPrimaryKey();
             foreach ($arr as $column => $value) {
                 if (($column !== $primaryKey) && ($column !== 'data_inclusao')) {
@@ -85,18 +80,38 @@ abstract class MapperAbstract
                 }
             }
         }
-        
+
         // Executes statement
         $id = $this->getDb()->execute(
-            new \Core\Db\Sql\Statement\Insert($this->_tableName, $arr, $arrOnUpdate)
+            new \Core\Db\Sql\Statement\Insert($this->tableName, $arr, $arrOnUpdate)
         );
-        
+
         // Updates model ID
         $model->setId($id);
-        
+
         return $model;
     }
-    
+
+    /**
+     * Parses default model fields
+     *
+     * @param  ModelAbstract $model Model
+     * @param  array         $arr   Data to be loaded
+     *
+     * @return array        New data
+     */
+    protected function parseDefaultFields(ModelAbstract $model, array $arr)
+    {
+        if ((!$model->getId()) && ((isset($arr['data_inclusao'])) || (\array_key_exists('data_inclusao', $arr)))) {
+            $arr['data_inclusao'] = new Expression('NOW()');
+        }
+        if ((isset($arr['data_alteracao'])) || (\array_key_exists('data_alteracao', $arr))) {
+            $arr['data_alteracao'] = new Expression('NOW()');
+        }
+
+        return $arr;
+    }
+
     /**
      * Loads data into model
      *
@@ -118,44 +133,23 @@ abstract class MapperAbstract
                 }
             }
         }
-        
+
         return $model;
     }
-    
+
     /**
      * Fetchs all data from table
      *
      * @param  array $where WHERE clauses (optional)
-     * 
+     *
      * @return array
      */
     public function fetchAll(array $where = null)
     {
         // Query
-        $db = $this->getDb();
-        $sql = \sprintf('SELECT * FROM %s', $db->quoteIdentifier($this->_tableName));
-        
-        if (!empty($where)) {
-            $arrWhere = $arrBind = [];
-            foreach ($where as $key => $value) {
-                if (\is_numeric($key)) {
-                    $arrWhere[] = $value;
-                } elseif (\is_array($value)) {
-                    $arrWhere[] = \str_replace('?', \rtrim(\str_repeat('?,', \count($value)), ','), $key);
-                    $arrBind = \array_merge($arrBind, $value);
-                } else {
-                    $arrWhere[] = $key;
-                    $arrBind[] = $value;
-                }
-            }
-            $sql .= ' WHERE ' . \implode(' AND ', $arrWhere);
-            
-            $query = $db->prepare($sql);
-            $query->execute($arrBind);
-        } else {
-            $query = $db->query($sql);
-        }
-        
+        $query = $this->buildQuery($where);
+
+
         // Iterates over data
         $arr = [];
         $class = static::MODEL;
@@ -166,7 +160,46 @@ abstract class MapperAbstract
         }
         return $arr;
     }
-    
+
+    /**
+     * Builds a query from the specified values
+     *
+     * @param array  $where WHERE clauses (optional)
+     *
+     * @return \PDOStatement
+     */
+    protected function buildQuery(array $where = null)
+    {
+        $sql = \sprintf('SELECT * FROM %s', $this->getDb()->quoteIdentifier($this->tableName));
+
+        if (empty($where)) {
+            return $this->getDb()->query($sql);
+        }
+
+        $arrWhere = $arrBind = [];
+        foreach ($where as $key => $value) {
+            if (\is_numeric($key)) {
+                $arrWhere[] = $value;
+                continue;
+            }
+
+            if (\is_array($value)) {
+                $arrWhere[] = \str_replace('?', \rtrim(\str_repeat('?,', \count($value)), ','), $key);
+                $arrBind = \array_merge($arrBind, $value);
+                continue;
+            }
+
+            $arrWhere[] = $key;
+            $arrBind[] = $value;
+        }
+        $sql .= ' WHERE ' . \implode(' AND ', $arrWhere);
+
+        $query = $this->getDb()->prepare($sql);
+        $query->execute($arrBind);
+
+        return $query;
+    }
+
     /**
      * Finds a row optionally filtered by $where caluses
      *
@@ -178,8 +211,8 @@ abstract class MapperAbstract
     {
         // Query
         $db = $this->getDb();
-        $sql = \sprintf('SELECT * FROM %s', $db->quoteIdentifier($this->_tableName));
-        
+        $sql = \sprintf('SELECT * FROM %s', $db->quoteIdentifier($this->tableName));
+
         // WHERE
         if (!empty($where)) {
             $arr = [];
@@ -189,17 +222,17 @@ abstract class MapperAbstract
             $sql .= ' WHERE ' . \implode(' AND ', $arr);
         }
         $sql .= ' LIMIT 1';
-        
+
         // Executes statement
         $query = $db->query($sql);
         if ($row = $query->fetch(\PDO::FETCH_ASSOC)) {
             $class = static::MODEL;
             return new $class($row);
         }
-        
+
         return null;
     }
-    
+
     /**
      * Finds a record by its id
      *
@@ -223,10 +256,10 @@ abstract class MapperAbstract
      * @return array
      */
     public static function getModelMapping(ModelAbstract $model)
-    { 
+    {
         $class = get_class($model);
-        if (!isset(self::$__arrMapping[$class])) {
-            self::$__arrMapping[$class] = [];
+        if (!isset(self::$arrMapping[$class])) {
+            self::$arrMapping[$class] = [];
             $reflect = new \ReflectionClass($model);
             $arrProp = $reflect->getProperties(\ReflectionProperty::IS_PROTECTED);
             foreach ($arrProp as $prop) {
@@ -235,14 +268,14 @@ abstract class MapperAbstract
                     $name = \substr($name, 1);
                     $index = $name;
                     $index[0] = \strtoupper($index);
-                    self::$__arrMapping[$class][$index] = \Core\Filter::uncamelCase($name, '_' /* $separator */);
+                    self::$arrMapping[$class][$index] = \Core\Filter::uncamelCase($name, '_' /* $separator */);
                 }
             }
         }
-        
-        return self::$__arrMapping[$class];
+
+        return self::$arrMapping[$class];
     }
-    
+
     /**
      * Returns current Adapter object
      *
@@ -250,6 +283,6 @@ abstract class MapperAbstract
      */
     public function getDb()
     {
-        return $this->__db;
+        return $this->db;
     }
 }

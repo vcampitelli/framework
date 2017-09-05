@@ -17,24 +17,24 @@ class Factory extends \Core\Service\FactoryAbstract
      * Builds a new database connection, ignoring the pool
      *
      * @param  string $alias Connection alias
-     * 
+     *
      * @return Adapter
      */
     public function build($alias)
     {
-        return new Adapter($this->_getConfig($alias));
+        return new Adapter($this->doGetConfig($alias));
     }
-    
+
     /**
      * Gets current configuration to connect to the database
      *
      * @throws \RuntimeException If no configuration is found
-     * 
+     *
      * @param  string $alias Connection alias
-     * 
+     *
      * @return array
      */
-    protected function _getConfig($alias)
+    protected function doGetConfig($alias)
     {
         $arr = $this->getConfig()->db()->{$alias};
         if (empty($arr)) {

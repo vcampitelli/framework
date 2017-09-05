@@ -18,8 +18,8 @@ class DataResponse extends ResponseAbstract
      *
      * @var array
      */
-    protected $_data = [];
-    
+    protected $data = [];
+
     /**
      * Returns a success response
      *
@@ -29,10 +29,10 @@ class DataResponse extends ResponseAbstract
      */
     protected function doSuccess($data)
     {
-        $this->_data = $this->_build($data, true);
+        $this->data = $this->build($data, true);
         return $this;
     }
-    
+
     /**
      * Returns an error response
      *
@@ -43,10 +43,10 @@ class DataResponse extends ResponseAbstract
      */
     protected function doError($data, $status)
     {
-        $this->_data = $this->_build($data, false, $status);
+        $this->data = $this->build($data, false, $status);
         return $this;
     }
-    
+
     /**
      * Dispatches a message
      *
@@ -56,23 +56,23 @@ class DataResponse extends ResponseAbstract
      *
      * @return string
      */
-    protected function _build($data, $status, $code = null)
+    protected function build($data, $status, $code = null)
     {
         // @TODO content-negotiation
         \header('Content-type: application/json');
-        
+
         $arr = [
             'status' => (bool) $status,
             'data'   => $data
         ];
-        
+
         if ($code) {
             $arr['code'] = $code;
         }
-        
+
         return $arr;
     }
-    
+
     /**
      * Dispatches current response
      *
@@ -80,6 +80,6 @@ class DataResponse extends ResponseAbstract
      */
     public function dispatch()
     {
-        echo \json_encode($this->_data);
+        echo \json_encode($this->data);
     }
 }

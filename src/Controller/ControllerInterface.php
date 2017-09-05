@@ -23,7 +23,7 @@ interface ControllerInterface
      * @param ContainerInterface $container Container object
      */
     public function __construct(ContainerInterface $container);
-    
+
     /**
      * Returns the container object
      *

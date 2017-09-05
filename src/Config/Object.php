@@ -18,15 +18,15 @@ class Object implements ConfigInterface
      *
      * @var array
      */
-    protected $_data = [];
-    
+    protected $data = [];
+
     /**
      * Pool of objects
      *
      * @var Object[]
      */
-    protected $_arrPool = [];
-    
+    protected $arrPool = [];
+
     /**
      * Constructor
      *
@@ -35,10 +35,10 @@ class Object implements ConfigInterface
     public function __construct(array $data = null)
     {
         if (!empty($data)) {
-            $this->_data = $data;
+            $this->data = $data;
         }
     }
-    
+
     /**
      * Magic getter for the properties
      *
@@ -50,7 +50,7 @@ class Object implements ConfigInterface
     {
         return $this->get($property);
     }
-    
+
     /**
      * Gets a the property
      *
@@ -60,9 +60,9 @@ class Object implements ConfigInterface
      */
     public function get($property)
     {
-        return (isset($this->_data[$property])) ? $this->_data[$property] : null;
+        return (isset($this->data[$property])) ? $this->data[$property] : null;
     }
-    
+
     /**
      * Magic call to get objects
      *
@@ -73,10 +73,10 @@ class Object implements ConfigInterface
      */
     public function __call($property, $args)
     {
-        if (!isset($this->_arrPool[$property])) {
-            $this->_arrPool[$property] = new Object($this->get($property));
+        if (!isset($this->arrPool[$property])) {
+            $this->arrPool[$property] = new Object($this->get($property));
         }
-        
-        return $this->_arrPool[$property];
+
+        return $this->arrPool[$property];
     }
 }

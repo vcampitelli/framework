@@ -28,7 +28,7 @@ class Filter
         }
         return $value;
     }
-    
+
     /**
      * Transforms a string from camel to normal case
      *

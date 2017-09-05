@@ -9,6 +9,7 @@
 namespace Core;
 
 use Core\Http\Router;
+use Core\Http\Request;
 
 /**
  * Application bootstrap
@@ -20,45 +21,47 @@ class Application
      *
      * @var Config\ConfigInterface
      */
-    protected $_config = null;
-    
+    protected $config = null;
+
     /**
      * Container object
      *
      * @var Service\Container
      */
-    protected $_container = null;
-    
+    protected $container = null;
+
     /**
      * Router object
      *
      * @var Router
      */
-    protected $_router = null;
-    
+    protected $router = null;
+
     /**
      * Constructor
-     * 
+     *
      * @param Config\ConfigInterface $config Configuration object
      */
     public function __construct(Config\ConfigInterface $config)
     {
-        $this->_config = $config;
+        $this->config = $config;
     }
-    
+
     /**
      * Bootstraps application
      *
+     * @param Request $request Request object
+     *
      * @return self
      */
-    public function run()
-    {    
+    public function run(Request $request)
+    {
         // Executes current route and dispatches its response
         $this->getRouter()->run();
-        
+
         return $this;
     }
-    
+
     /**
      * Gets the configuration object
      *
@@ -66,9 +69,9 @@ class Application
      */
     public function getConfig()
     {
-        return $this->_config;
+        return $this->config;
     }
-    
+
     /**
      * Returns Container object
      *
@@ -76,12 +79,12 @@ class Application
      */
     public function getContainer()
     {
-        if (!isset($this->_container)) {
-            $this->_container = new Service\Container($this->getConfig());
+        if (!isset($this->container)) {
+            $this->container = new Service\Container($this->getConfig());
         }
-        return $this->_container;
+        return $this->container;
     }
-    
+
     /**
      * Returns Router object
      *
@@ -89,17 +92,17 @@ class Application
      */
     public function getRouter()
     {
-        if ($this->_router === null) {
+        if ($this->router === null) {
             // Iniatilizing router
-            $this->_router = new Router($this);
-            
+            $this->router = new Router($this);
+
             // Checks base URL
             $baseUrl = $this->getConfig()->app()->baseUrl;
             if (!empty($baseUrl)) {
-                $this->_router->setBaseUrl($baseUrl);
+                $this->router->setBaseUrl($baseUrl);
             }
         }
-        
-        return $this->_router;
+
+        return $this->router;
     }
 }

@@ -22,40 +22,40 @@ abstract class FactoryAbstract
      *
      * @var array
      */
-    protected $_pool = [];
-    
+    protected $pool = [];
+
     /**
      * Configuration object
      *
      * @var ConfigInterface
      */
-    private $__config = null;
+    private $config = null;
 
     /**
      * Constructor
-     * 
+     *
      * @param ConfigInterface $config Configuration object
      */
     public function __construct(ConfigInterface $config)
     {
-        $this->__config = $config;
+        $this->config = $config;
     }
-    
+
     /**
      * Gets a database connection from pool
-     * 
+     *
      * @param  string $alias Connection alias
      *
      * @return Adapter
      */
     public function get($alias)
     {
-        if (!isset($this->_pool[$alias])) {
-            $this->_pool[$alias] = $this->build($alias);
+        if (!isset($this->pool[$alias])) {
+            $this->pool[$alias] = $this->build($alias);
         }
-        return $this->_pool[$alias];
+        return $this->pool[$alias];
     }
-    
+
     /**
      * Gets the configuration object
      *
@@ -63,16 +63,16 @@ abstract class FactoryAbstract
      */
     public function getConfig()
     {
-        return $this->__config;
+        return $this->config;
     }
-    
+
     /**
      * Builds a new object
      *
      * @abstract
-     * 
+     *
      * @param  string $alias Service type
-     * 
+     *
      * @return object
      */
     abstract public function build($alias);

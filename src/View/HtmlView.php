@@ -25,7 +25,7 @@ class HtmlView implements ViewInterface
         echo $this->partial($script);
         return $this;
     }
-    
+
     /**
      * Renders a script and returns its content
      *

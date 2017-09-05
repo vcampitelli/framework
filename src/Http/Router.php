@@ -20,22 +20,22 @@ class Router
      *
      * @var Application
      */
-    protected $_app = null;
-    
+    protected $app = null;
+
     /**
      * Application URL
      *
      * @var string
      */
-    protected $_baseUrl = '';
-    
+    protected $baseUrl = '';
+
     /**
      * Routing data
      *
      * @var array
      */
-    protected $_data = [];
-    
+    protected $data = [];
+
     /**
      * Constructor
      *
@@ -43,58 +43,78 @@ class Router
      */
     public function __construct(Application $app)
     {
-        $this->_app = $app;
+        $this->app = $app;
     }
-    
-    public function run(Request $request = null)
+
+    /**
+     * Process the request
+     *
+     * @param Request $request Request object
+     *
+     * @return Response\ResponseAbstract
+     */
+    public function run(Request $request)
     {
-        // Creates request object
-        if ($request === null) {
-            $request = Request::fromGlobals();
-        }
         $url = $request->getAttr('REQUEST_URI');
-        
+
         // Base URL
         $baseUrl = $this->getBaseUrl();
         if (!empty($baseUrl)) {
             $url = \substr($url, \strlen($baseUrl));
         }
-        
-        // Verifies that file exists
-        $url = \str_replace('..', '', $url);
-        $arr = parse_url($url);
-        $route = null;
-        if (!empty($arr['path'])) {
-            $url = $arr['path'];
-            if (!empty($this->_data)) {
-                foreach ($this->_data as $row) {
-                    if ((!empty($row['url'])) && ($url == $row['url'])) {
-                        $route = $row;
-                        break;
-                    }
-                }
-            }
-        }
-    
+
         try {
-            if ($route === null) {
+            // Verifies that route exists
+            $route = $this->getRouteByUrl($url);
+            if (!$route) {
                 throw new \Exception('Route not found.', 404);
             }
-            
+
             $response = $this->buildResponse($route['controller'], $route['action'], $request);
         } catch (\Exception $e) {
             $response = Response\ResponseAbstract::fromRequest($request);
             $response->withError($e->getMessage(), ($e->getCode()) ?: 500);
         }
-        
+
         if ($response instanceof Response\ViewResponse) {
             $response->dispatch($route['controller'], $route['action']);
-        } else {
-            $response->dispatch();
+            return $response;
         }
+
+        $response->dispatch();
         return $response;
     }
-    
+
+    /**
+     * Returns the corresponding route for the specified URL
+     *
+     * @param  string $url URL to be matched against
+     *
+     * @return array Route data
+     */
+    protected function getRouteByUrl($url)
+    {
+        $url = \str_replace('..', '', $url);
+        $arr = parse_url($url);
+
+        if (empty($arr['path'])) {
+            return false;
+        }
+
+        $url = $arr['path'];
+        if (empty($this->data)) {
+            return false;
+        }
+
+        foreach ($this->data as $row) {
+            if ((!empty($row['url'])) && ($url == $row['url'])) {
+                return $row;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Dispatches current route and returns the related response object
      *
@@ -114,19 +134,19 @@ class Router
         if (!\is_subclass_of($controller, '\Core\Controller\ControllerInterface')) {
             throw new \Exception('Invalid controller.', 404);
         }
-        
+
         // Dispatchs request to controller
         $controller = new $controller($this->getApplication()->getContainer());
         $return = $controller->{$action}($request);
         if ($return instanceof Response\ResponseAbstract) {
             return $return;
         }
-        
+
         // Default response
         $response = Response\ResponseAbstract::fromRequest($request);
         return $response->withSuccess($return);
     }
-    
+
     /**
      * Loads routing parameters
      *
@@ -144,10 +164,10 @@ class Router
         } elseif (!\is_array($param)) {
             throw new \DomainException('Couldn\'t load routes parameter');
         }
-        
+
         // @TODO check data integrity
-        $this->_data = $param;
-        
+        $this->data = $param;
+
         return $this;
     }
 
@@ -160,7 +180,7 @@ class Router
      */
     public function setBaseUrl($baseUrl)
     {
-        $this->_baseUrl = (string) $baseUrl;
+        $this->baseUrl = (string) $baseUrl;
 
         return $this;
     }
@@ -172,7 +192,7 @@ class Router
      */
     public function getBaseUrl()
     {
-        return $this->_baseUrl;
+        return $this->baseUrl;
     }
 
     /**
@@ -182,6 +202,6 @@ class Router
      */
     public function getApplication()
     {
-        return $this->_app;
+        return $this->app;
     }
 }

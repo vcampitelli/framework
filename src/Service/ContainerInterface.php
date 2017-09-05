@@ -17,11 +17,11 @@ interface ContainerInterface
 {
     /**
      * Constructor
-     * 
+     *
      * @param ConfigInterface $config Configuration object
      */
     public function __construct(ConfigInterface $config);
-    
+
     /**
      * Builds a new object
      *
@@ -30,7 +30,7 @@ interface ContainerInterface
      * @return object
      */
     public function get($class);
-    
+
     /**
      * Gets the configuration object
      *

@@ -22,8 +22,8 @@ abstract class ResponseAbstract
      *
      * @var Request
      */
-    protected $_request = null;
-    
+    protected $request = null;
+
     /**
      * Constructor
      *
@@ -31,16 +31,16 @@ abstract class ResponseAbstract
      */
     public function __construct(Request $request)
     {
-        $this->_request = $request;
+        $this->request = $request;
     }
-    
+
     /**
      * Build a new Response object from the Request
      *
      * @static
      *
      * @param  Request $request Request object
-     * 
+     *
      * @return Response
      */
     public static function fromRequest(Request $request)
@@ -48,10 +48,10 @@ abstract class ResponseAbstract
         if ($request->isAjax()) {
             return new DataResponse($request);
         }
-        
+
         return new ViewResponse($request);
     }
-    
+
     /**
      * Returns a success response
      *
@@ -64,7 +64,7 @@ abstract class ResponseAbstract
         $response = $this->doSuccess($data);
         return ($response instanceof ResponseAbstract) ? $response : $this;
     }
-    
+
     /**
      * Returns an error response
      *
@@ -81,17 +81,17 @@ abstract class ResponseAbstract
             $status = 500;
         }
         \http_response_code($status);
-        
+
         // Response
         $response = $this->doError($data, $status);
         return ($response instanceof ResponseAbstract) ? $response : $this;
     }
-    
+
     /**
      * Returns a success response
      *
      * @abstract
-     * 
+     *
      * @param  mixed $data Data to be dispatched
      *
      * @return self
@@ -102,19 +102,19 @@ abstract class ResponseAbstract
      * Returns an error response
      *
      * @abstract
-     * 
+     *
      * @param  string  $message Error message
      * @param  integer $status  HTTP status code
      *
      * @return self
      */
     abstract protected function doError($message, $status);
-    
+
     /**
      * Dispatches current response
      *
      * @abstract
-     * 
+     *
      * @return void
      */
     abstract public function dispatch();

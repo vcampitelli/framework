@@ -19,7 +19,7 @@ try {
     // Bootstrapping application
     $app = new \Core\Application($config);
     $app->getRouter()->load(realpath('../config/routes.php'));
-    $app->run();
+    $app->run(\Core\Http\Request::fromGlobals());
 } catch (Exception $e) {
     if (APPLICATION_ENV == 'development') {
         var_dump($e);

@@ -10,7 +10,7 @@ namespace Core\Model;
 
 /**
  * Abstract model
- * 
+ *
  * @abstract
  */
 abstract class ModelAbstract
@@ -26,7 +26,7 @@ abstract class ModelAbstract
             $this->load($data);
         }
     }
-    
+
     /**
      * Loads data into model
      *
@@ -49,12 +49,12 @@ abstract class ModelAbstract
         }
         return $this;
     }
-    
+
     /**
      * Magic call for getters and setters
      *
      * @throws \BadMethodCallException If it's an invalid property
-     * 
+     *
      * @param  string $method Method name
      * @param  array  $args   Arguments
      *
@@ -64,40 +64,56 @@ abstract class ModelAbstract
     {
         $prefix = \strtolower(\substr($method, 0, 3));
         $isGet = $prefix === 'get';
-        
+
         if (($isGet) || ($prefix === 'set')) {
             $property = \substr($method, 3);
-            $property[0] = \strtolower($property[0]);
-            if ($property === 'id') {
-                if (\defined('static::PRIMARY')) {
-                    $property = \Core\Filter::camelCase(static::PRIMARY);
-                } else {
-                    if ($isGet) {
-                        return null;
-                    } else {
-                        // let the rest of the code throw an exception
-                        $property = null;
+            if (!empty($property)) {
+                $property[0] = \strtolower($property[0]);
+
+                $exists = \property_exists($this, $property);
+                // Translates property
+                if (!$exists) {
+                    $property = $this->translateProperty($property);
+                    if (!empty($property)) {
+                        $exists = \property_exists($this, $property);
                     }
                 }
-            }
-            if ($property) {
-                $property = "_{$property}";
-                if (\property_exists($this, $property)) {
+
+                if ($exists) {
                     // get
                     if ($isGet) {
                         return $this->$property;
                     }
-                    
+
                     // set
                     $this->$property = $args[0];
                     return $this;
                 }
             }
         }
-        
+
         throw new \BadMethodCallException("Invalid method: {$method}");
     }
-    
+
+    /**
+     * Gets property name
+     *
+     * @param  string $property Property
+     *
+     * @return string Parsed property name
+     */
+    protected function translateProperty($property)
+    {
+        if ($property === 'id') {
+            if (\defined('static::PRIMARY')) {
+                return \Core\Filter::camelCase(static::PRIMARY);
+            }
+            return null;
+        }
+
+        return null;
+    }
+
     /**
      * Returns this model's primary key
      *

@@ -20,15 +20,15 @@ class ViewResponse extends ResponseAbstract
      *
      * @var string
      */
-    protected $_data = [];
-    
+    protected $data = [];
+
     /**
      * Response status
      *
      * @var boolean
      */
-    protected $_status = true;
-    
+    protected $status = true;
+
     /**
      * Returns a success response
      *
@@ -38,11 +38,11 @@ class ViewResponse extends ResponseAbstract
      */
     protected function doSuccess($data)
     {
-        $this->_data = (array) $data;
-        $this->_status = true;
+        $this->data = (array) $data;
+        $this->status = true;
         return $this;
     }
-    
+
     /**
      * Returns an error response
      *
@@ -53,18 +53,12 @@ class ViewResponse extends ResponseAbstract
      */
     protected function doError($data, $status)
     {
-        if (\is_array($data)) {
-            $this->_data = $data;
-        } else {
-            $this->_data = [
-                'content' => $data
-            ];
-        }
-        $this->_status = false;
-        
+        $this->data = (\is_array($data)) ? $data : ['content' => $data];
+        $this->status = false;
+
         return $this;
     }
-    
+
     /**
      * Dispatches current response
      *
@@ -74,48 +68,48 @@ class ViewResponse extends ResponseAbstract
     {
         // Initializing view
         $view = new View\HtmlView();
-        
+
         // Two arguments: controller and action
-        if (($this->_status) && (\func_num_args() == 2)) {
+        if (($this->status) && (\func_num_args() == 2)) {
             list($controller, $action) = \func_get_args();
             $controller = \strtolower($controller);
-            
+
             // Removes "Controller" from its name
             if (\substr($controller, -10) === 'controller') {
                 $controller = \substr($controller, 0, -10);
             }
-            
+
             // Separates module from the controller name
             $arr = \explode('\\', \trim($controller, '\\'));
             $module = \array_shift($arr);
-            
+
             // Script path
             $script = APPLICATION_PATH . "/{$module}/view/" . \implode('/', $arr) . "/{$action}.phtml";
             if (\is_file($script)) {
                 // Initializing view
                 $innerView = new View\HtmlView();
-                
+
                 // View data
-                foreach ($this->_data as $key => $value) {
+                foreach ($this->data as $key => $value) {
                     $innerView->{$key} = $value;
                 }
-                
+
                 // View content
                 $view->content = $innerView->partial($script);
 
                 $view->render(APPLICATION_PATH . '/view/layout.phtml');
                 return $this;
-            } else {
-                $view->content = "Couldn't find {$action} view for {$controller}";
             }
+
+            $view->content = "Couldn't find {$action} view for {$controller}";
         }
-        
+
         // View data
-        foreach ($this->_data as $key => $value) {
+        foreach ($this->data as $key => $value) {
             $view->{$key} = $value;
         }
         $view->render(APPLICATION_PATH . '/view/error.phtml');
-        
+
         return $this;
     }
 }

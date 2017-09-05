@@ -22,8 +22,8 @@ abstract class ControllerAbstract implements ControllerInterface
      *
      * @var ContainerInterface
      */
-    protected $_container = null;
-    
+    protected $container = null;
+
     /**
      * Constructor
      *
@@ -31,9 +31,9 @@ abstract class ControllerAbstract implements ControllerInterface
      */
     public function __construct(ContainerInterface $container)
     {
-        $this->_container = $container;
+        $this->container = $container;
     }
-    
+
     /**
      * Returns the container object
      *
@@ -41,6 +41,6 @@ abstract class ControllerAbstract implements ControllerInterface
      */
     public function getContainer()
     {
-        return $this->_container;
+        return $this->container;
     }
 }

@@ -19,21 +19,21 @@ class Adapter
      * @const string
      */
     const LOG_INFO    = 'INF';
-    
+
     /**
      * Debug level: successful operations
      *
      * @const string
      */
     const LOG_SUCCESS = 'OKK';
-    
+
     /**
      * Debug level: error only
      *
      * @const string
      */
     const LOG_ERROR   = 'ERR';
-    
+
     /**
      * Debug level: every operation
      *
@@ -46,34 +46,34 @@ class Adapter
      *
      * @var \PDO
      */
-    private $__pdo = null;
+    private $pdo = null;
 
     /**
      * Debug level
      *
      * @var string
      */
-    private $__debug = null;
-    
+    private $debug = null;
+
     /**
      * Constructor
      *
      * @throws  \InvalidArgumentException
-     * 
+     *
      * @param   array $data Connection options
-     * 
+     *
      * @return  void
      */
     public function __construct(array $data)
     {
         if (empty($data)) {
-            $this->__log(__METHOD__, 'array de configurações inexistente', self::LOG_ERROR);
+            $this->log(__METHOD__, 'array de configurações inexistente', self::LOG_ERROR);
             throw new \InvalidArgumentException('Nenhuma configuração para conexão foi informada.');
         }
-        
-        $this->__connect($data);
+
+        $this->connect($data);
     }
-    
+
     /**
      * Returns the DB handler
      *
@@ -81,15 +81,15 @@ class Adapter
      */
     public function handler()
     {
-        return $this->__pdo;
+        return $this->pdo;
     }
-    
+
     /**
      * Magic method to direct calls to the PDO object
      *
      * @param   string  $method Method name
      * @param   array   $args   Arguments
-     * 
+     *
      * @return  mixed
      */
     public function __call($method, $args)
@@ -100,30 +100,51 @@ class Adapter
     /**
      * Connects to the database
      *
-     * @throw new \InvalidArgumentException If there's a missing/invalid property
-     * 
      * @param  array $data Connection options
-     * 
+     *
      * @return \PDO
      */
-    private function __connect(array $data)
+    protected function connect(array $data)
+    {
+        $this->pdo = $this->buildConnection($data);
+        $this->log(__METHOD__, "conectado ao banco {$data['database']}", self::LOG_SUCCESS);
+
+        // Debug level
+        if (empty($data['debug'])) {
+            $data['debug'] = self::LOG_INFO;
+        }
+        $this->debug = $data['debug'];
+
+        return $this->pdo;
+    }
+
+    /**
+     * Actually builds the connection object
+     *
+     * @throw new \InvalidArgumentException If there's a missing/invalid property
+     *
+     * @param array $data      Configuration
+     *
+     * @return PDO
+     */
+    protected function buildConnection(array $data, array $arrConfig = [])
     {
         if (empty($data['database'])) {
             throw new \InvalidArgumentException('Você deve especificar o nome da base de dados.');
         }
-        
+
         // Connection options
         $arrConfig = [];
         if (!empty($data['utf8'])) {
             $arrConfig[\PDO::MYSQL_ATTR_INIT_COMMAND] = 'SET NAMES utf8';
         }
-        
+
         // Default port
         $data['port'] = (isset($data['port'])) ? (int) $data['port'] : false;
-        if (!$data['port']) {
+        if ($data['port'] < 1) {
             $data['port'] = 3306;
         }
-        
+
         // DSN
         $dsn = \sprintf(
             'mysql:host=%s;port=%d;dbname=%s',
@@ -131,24 +152,17 @@ class Adapter
             $data['port'],
             $data['database']
         );
-        
+
         // Connecting
-        $this->__pdo = new \PDO(
+        $pdo = new \PDO(
             $dsn,
             (empty($data['username'])) ? '' : $data['username'],
             (empty($data['password'])) ? '' : $data['password'],
             $arrConfig
         );
-        $this->__pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        $this->__log(__METHOD__, "conectado ao banco {$data['database']}", self::LOG_SUCCESS);        
-        
-        // Debug level
-        if (empty($data['debug'])) {
-            $data['debug'] = self::LOG_INFO;
-        }
-        $this->__debug = $data['debug'];
-        
-        return $this->__pdo;
+        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+        return $pdo;
     }
 
     /**
@@ -159,7 +173,7 @@ class Adapter
     public function __destruct()
     {
         $this->disconnect();
-        $this->__log(__METHOD__, 'desconectado', self::LOG_SUCCESS);        
+        $this->log(__METHOD__, 'desconectado', self::LOG_SUCCESS);
     }
 
     /**
@@ -170,11 +184,11 @@ class Adapter
     public function disconnect()
     {
         try {
-            $this->__pdo = null;
+            $this->pdo = null;
         } catch (\Exception $e) {
-            $this->__log(
+            $this->log(
                 __METHOD__,
-                "erro ao desconectar do banco {$this->__database}: {$e->getMessage()}",
+                "erro ao desconectar do banco: {$e->getMessage()}",
                 self::LOG_ERROR
             );
         }
@@ -184,26 +198,26 @@ class Adapter
      * Executes a query
      *
      * @throws  \Exception
-     * 
+     *
      * @param   string  $sql Query statement
-     * @return  
+     * @return
      */
     public function query($sql)
     {
-        $this->__log(__METHOD__, "query: {$sql}");
+        $this->log(__METHOD__, "query: {$sql}");
         try {
-            return $this->__pdo->query($sql);
+            return $this->pdo->query($sql);
         } catch (\Exception $e) {
-            $this->__log(__METHOD__, "erro: {$e->getMessage()}", self::LOG_ERROR);
+            $this->log(__METHOD__, "erro: {$e->getMessage()}", self::LOG_ERROR);
             throw $e;
-        }            
+        }
     }
-    
+
     /**
      * Fetches all data by query and optionally indexes rows by $indexField
      *
      * @throws \Exception
-     * 
+     *
      * @param  mixed  $query      SQL string or a PDOStatement instance
      * @param  string $indexField Index field (optional)
      *
@@ -213,17 +227,17 @@ class Adapter
     {
         // SQL string
         if (\is_string($query)) {
-            $query = $this->__pdo->query($query);
+            $query = $this->pdo->query($query);
             if ($query === false) {
                 return [];
             }
         }
-        
+
         // Invalid argument
         if (!$query instanceof \PDOStatement) {
             throw new \InvalidArgumentException(\get_class($query) . ' não é um objeto de sentença válido.');
         }
-        
+
         // If supplied $indexField
         if ($indexField) {
             $ret = [];
@@ -234,11 +248,11 @@ class Adapter
             }
             return $ret;
         }
-        
+
         // Otherwise, fetches all data
-        return $query->fetchAll(PDO::FETCH_ASSOC); 
+        return $query->fetchAll(PDO::FETCH_ASSOC);
     }
-    
+
     /**
      * Quotes field
      *
@@ -251,9 +265,9 @@ class Adapter
         if ($value === null) {
             return 'NULL';
         }
-        return $this->__pdo->quote($value);
+        return $this->pdo->quote($value);
     }
-    
+
     /**
      * Executes statement
      *
@@ -265,7 +279,7 @@ class Adapter
     {
         return $statement->execute($this);
     }
-    
+
     /**
      * Quotes identifier
      *
@@ -286,9 +300,9 @@ class Adapter
      * @param   int     $type       Tipo do log (padrão: self::LOG_INFO)
      * @return void
      */
-    private function __log($cat, $text, $type = self::LOG_INFO)
+    private function log($cat, $text, $type = self::LOG_INFO)
     {
-        if (($this->__debug === $type) || ($this->__debug === self::LOG_DEBUG)) {
+        if (($this->debug === $type) || ($this->debug === self::LOG_DEBUG)) {
             file_put_contents(
                 __DIR__ . '/db.log',
                 '[' . date('d/m/Y H:i:s') . "] [{$type}|{$cat}]\t{$text}\n",

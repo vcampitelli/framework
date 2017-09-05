@@ -23,10 +23,10 @@ class Config extends Object
     public function readIni($file)
     {
         $arr = \parse_ini_file($file, true);
-        $this->_data = $this->_parse($arr);
+        $this->_data = $this->parse($arr);
         return $this;
     }
-    
+
     /**
      * Parses a section
      *
@@ -34,12 +34,12 @@ class Config extends Object
      *
      * @return array        Parsed data
      */
-    protected function _parse(array $data)
+    protected function parse(array $data)
     {
         foreach ($data as $key => $value) {
             if (is_array($value)) {
                 // Recursive
-                $data[$key] = $this->_parse($value);
+                $data[$key] = $this->parse($value);
             } elseif ((\strpos($value, '::') !== false) && (\defined($value))) {
                 // Replaces Class::CONSTANT with the actual value
                 $data[$key] = \constant($value);

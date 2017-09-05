@@ -18,22 +18,22 @@ class Request
      *
      * @var array
      */
-    protected $_server = [];
-    
+    protected $server = [];
+
     /**
      * GET data
      *
      * @var array
      */
-    protected $_get = [];
-    
+    protected $get = [];
+
     /**
      * POST data
      *
      * @var array
      */
-    protected $_post = [];
-    
+    protected $post = [];
+
     /**
      * Constructor
      *
@@ -43,16 +43,16 @@ class Request
      */
     public function __construct(array $server, array $get = [], array $post = [])
     {
-        $this->_server = $server;
-        $this->_get    = $get;
-        $this->_post   = $post;
+        $this->server = $server;
+        $this->get    = $get;
+        $this->post   = $post;
     }
-    
+
     /**
      * Build a new Request object from global variables
      *
      * @static
-     * 
+     *
      * @return Request
      */
     public static function fromGlobals()
@@ -63,7 +63,7 @@ class Request
             $_POST
         );
     }
-    
+
     /**
      * Returns the specified data from the request
      *
@@ -74,16 +74,16 @@ class Request
      */
     public function get($property, $default = null)
     {
-        if (isset($this->_post[$property])) {
-            return $this->_post[$property];
+        if (isset($this->post[$property])) {
+            return $this->post[$property];
         }
-        if (isset($this->_get[$property])) {
-            return $this->_get[$property];
+        if (isset($this->get[$property])) {
+            return $this->get[$property];
         }
-        
+
         return $default;
     }
-    
+
     /**
      * Checks if it's an AJAX request (probably)
      *
@@ -91,10 +91,10 @@ class Request
      */
     public function isAjax()
     {
-        return (!empty($this->_server['HTTP_X_REQUESTED_WITH']))
-            && (\strtolower($this->_server['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+        return (!empty($this->server['HTTP_X_REQUESTED_WITH']))
+            && (\strtolower($this->server['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
     }
-    
+
     /**
      * Returns the request attribute
      *
@@ -104,6 +104,6 @@ class Request
      */
     public function getAttr($attr)
     {
-        return (isset($this->_server[$attr])) ? $this->_server[$attr] : null;
+        return (isset($this->server[$attr])) ? $this->server[$attr] : null;
     }
 }

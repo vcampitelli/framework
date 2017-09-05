@@ -18,8 +18,8 @@ class Expression
      *
      * @var string
      */
-    protected $_value = null;
-    
+    protected $value = null;
+
     /**
      * Constructor
      *
@@ -27,9 +27,9 @@ class Expression
      */
     public function __construct($value)
     {
-        $this->_value = $value;
+        $this->value = $value;
     }
-    
+
     /**
      * Converts expression to string
      *
@@ -37,6 +37,6 @@ class Expression
      */
     public function __toString()
     {
-        return (string) $this->_value;
+        return (string) $this->value;
     }
 }
