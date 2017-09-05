@@ -6,7 +6,7 @@
  * @since      2016-11-19
  */
 
-namespace Core\View;
+namespace Vcampitelli\Framework\View;
 
 /**
  * View interface

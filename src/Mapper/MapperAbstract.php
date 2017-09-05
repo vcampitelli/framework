@@ -6,11 +6,11 @@
  * @since       2015-10-14
  */
 
-namespace Core\Mapper;
+namespace Vcampitelli\Framework\Mapper;
 
-use Core\Model\ModelAbstract;
-use Core\Db\Adapter;
-use Core\Db\Sql\Expression;
+use Vcampitelli\Framework\Model\ModelAbstract;
+use Vcampitelli\Framework\Db\Adapter;
+use Vcampitelli\Framework\Db\Sql\Expression;
 
 /**
  * Abstract mapper

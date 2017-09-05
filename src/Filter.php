@@ -5,7 +5,7 @@
  * @since   2015-10-14
  */
 
-namespace Core;
+namespace Vcampitelli\Framework;
 
 /**
  * Common filters

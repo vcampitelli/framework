@@ -6,10 +6,10 @@
  * @since       2016-11-02
  */
 
-namespace Core\Db\Sql\Statement;
+namespace Vcampitelli\Framework\Db\Sql\Statement;
 
-use Core\Db\Adapter;
-use Core\Db\Sql\Expression;
+use Vcampitelli\Framework\Db\Adapter;
+use Vcampitelli\Framework\Db\Sql\Expression;
 
 /**
  * Insert expression

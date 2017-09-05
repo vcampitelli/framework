@@ -6,9 +6,9 @@
  * @since      2016-11-19
  */
 
-namespace Core\Http\Response;
+namespace Vcampitelli\Framework\Http\Response;
 
-use Core\View;
+use Vcampitelli\Framework\View;
 
 /**
  * Simple view (HTML) response
@@ -83,7 +83,7 @@ class ViewResponse extends ResponseAbstract
             $arr = \explode('\\', \trim($controller, '\\'));
             $module = \array_shift($arr);
 
-            // Script path
+            // Script path @FIXME APPLICATION_PATH
             $script = APPLICATION_PATH . "/{$module}/view/" . \implode('/', $arr) . "/{$action}.phtml";
             if (\is_file($script)) {
                 // Initializing view

@@ -6,9 +6,9 @@
  * @since       2016-11-02
  */
 
-namespace Core\Controller;
+namespace Vcampitelli\Framework\Controller;
 
-use Core\Service\ContainerInterface;
+use Vcampitelli\Framework\Service\ContainerInterface;
 
 /**
  * Abstract controller

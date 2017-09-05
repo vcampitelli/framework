@@ -6,7 +6,7 @@
  * @since       2015-10-14
  */
 
-namespace Core\Model;
+namespace Vcampitelli\Framework\Model;
 
 /**
  * Abstract model

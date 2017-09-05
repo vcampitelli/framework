@@ -6,9 +6,9 @@
  * @since       2015-10-12
  */
 
-namespace Core\Service;
+namespace Vcampitelli\Framework\Service;
 
-use Core\Config\ConfigInterface;
+use Vcampitelli\Framework\Config\ConfigInterface;
 
 /**
  * Abstract factory

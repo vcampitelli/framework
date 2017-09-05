@@ -6,9 +6,9 @@
  * @since       2016-10-30
  */
 
-namespace Core\Http;
+namespace Vcampitelli\Framework\Http;
 
-use Core\Application;
+use Vcampitelli\Framework\Application;
 
 /**
  * URL routing

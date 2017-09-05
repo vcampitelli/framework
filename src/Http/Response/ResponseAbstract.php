@@ -6,9 +6,9 @@
  * @since      2016-11-02
  */
 
-namespace Core\Http\Response;
+namespace Vcampitelli\Framework\Http\Response;
 
-use Core\Http\Request;
+use Vcampitelli\Framework\Http\Request;
 
 /**
  * Handles response

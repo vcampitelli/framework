@@ -6,10 +6,10 @@
  * @since       2016-10-30
  */
 
-namespace Core;
+namespace Vcampitelli\Framework;
 
-use Core\Http\Router;
-use Core\Http\Request;
+use Vcampitelli\Framework\Http\Router;
+use Vcampitelli\Framework\Http\Request;
 
 /**
  * Application bootstrap

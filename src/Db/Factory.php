@@ -6,7 +6,7 @@
  * @since       2015-10-12
  */
 
-namespace Core\Db;
+namespace Vcampitelli\Framework\Db;
 
 /**
  * Factory for the adapters

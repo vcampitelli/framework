@@ -6,7 +6,7 @@
  * @since       2016-10-30
  */
 
-namespace Core\Config;
+namespace Vcampitelli\Framework\Config;
 
 /**
  * Represents a object from the configuration data

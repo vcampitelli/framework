@@ -6,9 +6,9 @@
  * @since       2016-11-02
  */
 
-namespace Core\Db\Sql\Statement;
+namespace Vcampitelli\Framework\Db\Sql\Statement;
 
-use Core\Db\Adapter;
+use Vcampitelli\Framework\Db\Adapter;
 
 /**
  * Insert expression

@@ -6,9 +6,9 @@
  * @since       2016-10-30
  */
 
-namespace Core\Service;
+namespace Vcampitelli\Framework\Service;
 
-use Core\Config\ConfigInterface;
+use Vcampitelli\Framework\Config\ConfigInterface;
 
 /**
  * Application service manager

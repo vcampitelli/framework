@@ -6,7 +6,7 @@
  * @since       2016-11-02
  */
 
-namespace Core\Http;
+namespace Vcampitelli\Framework\Http;
 
 /**
  * Handles current request

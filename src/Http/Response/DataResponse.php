@@ -6,7 +6,7 @@
  * @since      2016-11-19
  */
 
-namespace Core\Http\Response;
+namespace Vcampitelli\Framework\Http\Response;
 
 /**
  * Simple data (JSON/XML/etc) response

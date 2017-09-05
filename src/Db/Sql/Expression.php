@@ -6,7 +6,7 @@
  * @since       2016-11-02
  */
 
-namespace Core\Db\Sql;
+namespace Vcampitelli\Framework\Db\Sql;
 
 /**
  * SQL expression

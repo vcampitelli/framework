@@ -6,7 +6,7 @@
  * @since       2016-11-02
  */
 
-namespace Core\Config;
+namespace Vcampitelli\Framework\Config;
 
 /**
  * Configuration interface
