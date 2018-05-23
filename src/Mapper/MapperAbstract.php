@@ -11,6 +11,7 @@ namespace Vcampitelli\Framework\Mapper;
 use Vcampitelli\Framework\Model\ModelAbstract;
 use Vcampitelli\Framework\Db\Adapter;
 use Vcampitelli\Framework\Db\Sql\Expression;
+use Vcampitelli\Framework\Filter;
 
 /**
  * Abstract mapper
@@ -263,12 +264,9 @@ abstract class MapperAbstract
             $arrProp = $reflect->getProperties(\ReflectionProperty::IS_PROTECTED);
             foreach ($arrProp as $prop) {
                 $name = $prop->getName();
-                if (($name[0] === '_') && ($name !== '_primary')) {
-                    $name = \substr($name, 1);
-                    $index = $name;
-                    $index[0] = \strtoupper($index);
-                    self::$arrMapping[$class][$index] = \Vcampitelli\Framework\Filter::uncamelCase($name, '_' /* $separator */);
-                }
+                $index = $name;
+                $index[0] = \strtoupper($index);
+                self::$arrMapping[$class][$index] = Filter::uncamelCase($name, '_' /* $separator */);
             }
         }
 
